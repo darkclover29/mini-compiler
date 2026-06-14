@@ -1,0 +1,28 @@
+/*
+  Testing new features:
+  - Multi-line comments
+  - Modulo operator (%)
+  - Float/Double calculations
+  - Desugared C-style for loops
+  - Built-in type() and append()
+*/
+
+print "=== Floats & Modulo ===";
+let pi = 3.14159;
+let r = 5.0;
+let area = pi * r * r;
+print "Area: " + area;
+print "5.5 % 2 = " + (5.5 % 2);
+
+print "=== For Loop ===";
+for (let i = 0; i < 3; i = i + 1) {
+    print "Loop i = " + i;
+}
+
+print "=== Built-ins ===";
+let list = [10, 20];
+print "Original: " + list;
+print "Type of list: " + type(list);
+append(list, 3.14);
+print "Modified: " + list;
+print "Type of 3.14: " + type(3.14);

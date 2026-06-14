@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-obsidian">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Compiler IDE</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Background Canvas for Glowing Node Network -->
+    <canvas id="canvas-network"></canvas>
+    
+    <div class="glow-bg"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="logo-area">
+                <div class="logo-orb"></div>
+                <h1>Mini Compiler <span class="badge">v2.2</span></h1>
+            </div>
+            
+            <div class="header-controls">
+                <!-- Preset Examples -->
+                <div class="select-wrapper">
+                    <i data-lucide="book-open" class="control-icon"></i>
+                    <select id="examples-select">
+                        <option value="factorial">Example: Factorial Recursion</option>
+                        <option value="fibonacci">Example: Fibonacci Loop</option>
+                        <option value="strings">Example: String Operations</option>
+                        <option value="scoping">Example: Block Scope Shadowing</option>
+                        <option value="arrays">Example: Arrays & Built-ins</option>
+                        <option value="newfeatures">Example: New Features (For, Mod, Floats)</option>
+                    </select>
+                </div>
+
+                <!-- Theme Customizer -->
+                <div class="select-wrapper">
+                    <i data-lucide="palette" class="control-icon"></i>
+                    <select id="theme-select">
+                        <option value="theme-obsidian">Theme: Obsidian Neon</option>
+                        <option value="theme-emerald">Theme: Emerald Dark</option>
+                        <option value="theme-rose">Theme: Rose Quartz</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="status-indicator">
+                <span class="pulse-dot"></span>
+                <span class="status-text">Engine Ready: Java 17</span>
+            </div>
+        </header>
+
+        <!-- Telemetry Analytics Dashboard -->
+        <section class="telemetry-bar">
+            <div class="telemetry-card">
+                <div class="telemetry-header">
+                    <span class="telemetry-label">Tokens Scanned</span>
+                    <i data-lucide="binary" class="telemetry-icon"></i>
+                </div>
+                <span class="telemetry-val" id="metric-tokens">0</span>
+                <div class="telemetry-bar-bg">
+                    <div class="telemetry-progress" id="progress-tokens" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="telemetry-card">
+                <div class="telemetry-header">
+                    <span class="telemetry-label">AST Statements</span>
+                    <i data-lucide="git-fork" class="telemetry-icon"></i>
+                </div>
+                <span class="telemetry-val" id="metric-statements">0</span>
+                <div class="telemetry-bar-bg">
+                    <div class="telemetry-progress" id="progress-statements" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="telemetry-card">
+                <div class="telemetry-header">
+                    <span class="telemetry-label">Declared Variables</span>
+                    <i data-lucide="variable" class="telemetry-icon"></i>
+                </div>
+                <span class="telemetry-val" id="metric-vars">0</span>
+                <div class="telemetry-bar-bg">
+                    <div class="telemetry-progress" id="progress-vars" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="telemetry-card">
+                <div class="telemetry-header">
+                    <span class="telemetry-label">Loops & Conditions</span>
+                    <i data-lucide="refresh-cw" class="telemetry-icon"></i>
+                </div>
+                <span class="telemetry-val" id="metric-loops">0</span>
+                <div class="telemetry-bar-bg">
+                    <div class="telemetry-progress" id="progress-loops" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Left Pane: Editor & Tokens -->
+            <div class="left-pane">
+                <div class="card editor-card">
+                    <div class="card-header">
+                        <div class="tab-title">
+                            <i data-lucide="code-2" class="icon"></i>
+                            <span>Source Code</span>
+                        </div>
+                        <div class="actions">
+                            <button id="download-btn" class="btn btn-secondary" title="Export current code to a file">
+                                <i data-lucide="download" class="icon"></i>
+                                <span>Download</span>
+                            </button>
+                            <button id="run-btn" class="btn btn-primary">
+                                <i data-lucide="play" class="icon-play"></i>
+                                <span>Run Code</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-wrapper">
+                        <div class="line-numbers" id="line-numbers">1</div>
+                        <textarea id="editor" placeholder="// Write your custom program here..." spellcheck="false">// Factorial function demonstrating recursion, if-else, returns
+fun fact(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * fact(n - 1);
+}
+
+let result = fact(5);
+print "Factorial of 5 is: " + result;
+</textarea>
+                    </div>
+
+                    <!-- Editor Status Bar -->
+                    <div class="editor-status-bar">
+                        <div class="status-left">
+                            <span class="status-item">
+                                <i data-lucide="mouse-pointer-click" class="status-icon"></i>
+                                <span id="status-line-col">Ln 1, Col 1</span>
+                            </span>
+                            <span class="status-item" id="editor-char-count">0 chars</span>
+                        </div>
+                        <div class="status-right">
+                            <button id="copy-btn" class="status-action-btn" title="Copy code to clipboard">
+                                <i data-lucide="copy" class="status-icon"></i>
+                                <span>Copy Code</span>
+                            </button>
+                            <span class="status-item font-highlight">Custom Mini-Lang</span>
+                            <span class="status-item">UTF-8</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card tokens-card">
+                    <div class="card-header">
+                        <div class="tab-title">
+                            <i data-lucide="binary" class="icon"></i>
+                            <span>Lexer Scanned Tokens</span>
+                        </div>
+                        <!-- Color Category Legend -->
+                        <div class="legend">
+                            <span class="legend-item"><span class="legend-dot kw"></span>Keyword</span>
+                            <span class="legend-item"><span class="legend-dot id"></span>Identifier</span>
+                            <span class="legend-item"><span class="legend-dot num"></span>Number</span>
+                            <span class="legend-item"><span class="legend-dot str"></span>String</span>
+                            <span class="legend-item"><span class="legend-dot op"></span>Operator</span>
+                        </div>
+                    </div>
+                    <div class="tokens-container" id="tokens-list">
+                        <span class="placeholder-text">Tokens will appear here after scanning.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pane: Outputs -->
+            <div class="right-pane">
+                <div class="card output-card">
+                    <div class="card-header">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="console">
+                                <i data-lucide="terminal" class="icon"></i>
+                                <span>Console Output</span>
+                            </button>
+                            <button class="tab-btn" data-tab="ast">
+                                <i data-lucide="git-fork" class="icon"></i>
+                                <span>AST Visualizer</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content active" id="tab-console">
+                        <div class="terminal" id="terminal-output">
+                            <div class="system-line">Mini Compiler IDE Console ready. Click "Run Code" to execute.</div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tab-ast">
+                        <div class="ast-wrapper" id="ast-container">
+                            <span class="placeholder-text">AST tree will render here after parsing.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Initialize Lucide icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    <!-- Autocomplete Suggestion Popup Container -->
+    <div id="autocomplete-popup" class="autocomplete-suggestion">
+        <div><span class="key-badge">Tab</span>Press Tab to complete:</div>
+        <div class="snippet-preview" id="autocomplete-preview"></div>
+        <div class="description" id="autocomplete-desc"></div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
